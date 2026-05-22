@@ -1,66 +1,88 @@
-## Foundry
+# Voting
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Smart contract de système de vote développé en Solidity avec Foundry.
 
-Foundry consists of:
+## Description
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+Ce projet implémente un système de vote basé sur Ethereum.
 
-## Documentation
+Les électeurs sont enregistrés via une liste blanche d’adresses Ethereum et suivent un processus de vote structuré.
 
-https://book.getfoundry.sh/
+Le système permet :
 
-## Usage
+- l’enregistrement des électeurs ;
+- l’enregistrement de propositions ;
+- le vote sur une proposition ;
+- le calcul du gagnant.
 
-### Build
+Le vote est transparent :
+- les utilisateurs whitelistés peuvent consulter les votes ;
+- chaque électeur ne vote qu’une seule fois ;
+- le gagnant est déterminé à la majorité simple.
 
-```shell
-$ forge build
+---
+
+## Fonctionnalités prévues
+
+- Gestion d’une whitelist d’électeurs
+- Gestion des propositions
+- Gestion des états du vote
+- Vote unique par électeur
+- Comptabilisation des votes
+- Détermination du gagnant
+- Contrôle administrateur avec OpenZeppelin Ownable
+
+---
+
+## Stack technique
+
+- Solidity
+- Foundry
+- OpenZeppelin
+- GitHub Actions
+
+---
+
+## Workflow du vote
+
+Deploy
+↓
+Enregistrement des électeurs
+↓
+Début enregistrement propositions
+↓
+Fin enregistrement propositions
+↓
+Début session de vote
+↓
+Fin session de vote
+↓
+Comptabilisation
+↓
+Consultation du gagnant
+
+
+
+## Structure du projet
+
+src/
+→ smart contracts
+
+test/
+→ tests Foundry
+
+script/
+→ scripts de déploiement
+
+lib/
+→ dépendances
+
+.github/
+→ CI GitHub Actions
 ```
 
-### Test
+---
 
-```shell
-$ forge test
-```
+## Auteur
 
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+GitHub : @alcaniz
