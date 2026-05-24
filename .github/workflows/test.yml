@@ -11,12 +11,14 @@ jobs:
   check:
     name: Foundry project
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
+
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
-          persist-credentials: false
           submodules: recursive
 
       - name: Install Foundry
@@ -25,11 +27,11 @@ jobs:
       - name: Show Forge version
         run: forge --version
 
-      - name: Run Forge fmt
+      - name: Check formatting
         run: forge fmt --check
 
-      - name: Run Forge build
+      - name: Build contracts
         run: forge build --sizes
 
-      - name: Run Forge tests
+      - name: Run tests
         run: forge test -vvv
