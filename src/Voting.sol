@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.35;
 
-import {Ownable} from "..lib/openzeppelin-contracts/access/Ownable.sol"
+import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
 contract Voting is Ownable {
+
+    constructor() Ownable(msg.sender) {}
+
 
 enum WorkflowStatus {
     RegisteringVoters,
