@@ -38,5 +38,16 @@ contract Voting is Ownable {
     Proposal[] proposals;
 
     WorkflowStatus workflowStatus;
+    
+    function whitelistAdd(address voterAddress) public onlyOwner {
+    require(
+        !voters[voterAddress].isRegistered,
+        "Voter already registered"
+    );
+
+    voters[voterAddress].isRegistered = true;
+
+    emit VoterRegistered(voterAddress);
+}
 }
 
