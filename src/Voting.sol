@@ -78,5 +78,17 @@ contract Voting is Ownable {
 
         emit WorkflowStatusChange(previousStatus, workflowStatus);
     }
+
+    function startVotingSession() public onlyOwner {
+        require(
+            workflowStatus == WorkflowStatus.ProposalsRegistrationEnded, "Proposals registration phase must be ended"
+        );
+
+        WorkflowStatus previousStatus = workflowStatus;
+
+        workflowStatus = WorkflowStatus.VotingSessionStarted;
+
+        emit WorkflowStatusChange(previousStatus, workflowStatus);
+    }
 }
 
