@@ -56,5 +56,17 @@ contract Voting is Ownable {
 
         emit WorkflowStatusChange(previousStatus, workflowStatus);
     }
+
+    function addProposal(string memory description) public {
+        require(workflowStatus == WorkflowStatus.ProposalsRegistrationStarted, "Proposal registration not started");
+
+        require(voters[msg.sender].isRegistered, "Voter must be registered");
+
+        proposals.push(Proposal(description, 0));
+
+        uint256 proposalId = proposals.length - 1;
+
+        emit ProposalRegistered(proposalId);
+    }
 }
 
