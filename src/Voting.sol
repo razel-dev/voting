@@ -90,5 +90,15 @@ contract Voting is Ownable {
 
         emit WorkflowStatusChange(previousStatus, workflowStatus);
     }
+
+    function endVotingSession() public onlyOwner {
+        require(workflowStatus == WorkflowStatus.VotingSessionStarted, "Voting session started phase required");
+
+        WorkflowStatus previousStatus = workflowStatus;
+
+        workflowStatus = WorkflowStatus.VotingSessionEnded;
+
+        emit WorkflowStatusChange(previousStatus, workflowStatus);
+    }
 }
 
