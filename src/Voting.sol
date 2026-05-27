@@ -32,5 +32,11 @@ contract Voting is Ownable {
     }
 
     uint256 winningProposalId;
+
+    mapping(address => Voter) voters;
+
+    Proposal[] proposals;
+
+    WorkflowStatus workflowStatus;
 }
 
