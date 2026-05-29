@@ -118,5 +118,24 @@ contract Voting is Ownable {
 
         emit Voted(msg.sender, votedProposalId);
     }
+
+    function tallyVotes() public onlyOwner {
+        require(workflowStatus == WorkflowStatus.VotingSessionEnded, "Voting session ended phase required");
+
+        uint256 winningVoteCount = 0;
+
+        for (uint256 i = 0; i < proposals.length; i++) {
+            if (proposals[i].voteCount > winningVoteCount) {
+                winningVoteCount = proposals[i].voteCount;
+                winningProposalId = i;
+            }
+        }
+
+        WorkflowStatus previousStatus = workflowStatus;
+
+        workflowStatus = WorkflowStatus.VotesTallied;
+
+        emit WorkflowStatusChange(previousStatus, workflowStatus);
+    }
 }
 
