@@ -15,4 +15,8 @@ contract VotingPlus is Voting {
 
         super.addProposal(description);
     }
+
+    function getProposalCount() public view returns (uint256) {
+        return proposals.length;
+    }
 }
