@@ -57,7 +57,7 @@ contract Voting is Ownable {
         emit WorkflowStatusChange(previousStatus, workflowStatus);
     }
 
-    function addProposal(string memory description) public {
+    function addProposal(string memory description) public virtual {
         require(workflowStatus == WorkflowStatus.ProposalsRegistrationStarted, "Proposal registration not started");
 
         require(voters[msg.sender].isRegistered, "Voter must be registered");
