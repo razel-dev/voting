@@ -9,4 +9,10 @@ contract VotingPlus is Voting {
 
         _;
     }
+
+    function addProposal(string memory description) public override {
+        require(bytes(description).length > 0, "Proposal cannot be empty");
+
+        super.addProposal(description);
+    }
 }
