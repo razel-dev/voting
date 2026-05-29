@@ -19,4 +19,10 @@ contract VotingPlus is Voting {
     function getProposalCount() public view returns (uint256) {
         return proposals.length;
     }
+
+    function getProposal(uint256 proposalId) public view returns (Proposal memory) {
+        require(proposalId < proposals.length, "Proposal does not exist");
+
+        return proposals[proposalId];
+    }
 }
