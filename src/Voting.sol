@@ -100,5 +100,23 @@ contract Voting is Ownable {
 
         emit WorkflowStatusChange(previousStatus, workflowStatus);
     }
+
+    function setVote(uint256 votedProposalId) public {
+        require(workflowStatus == WorkflowStatus.VotingSessionStarted, "Voting session not started");
+
+        require(voters[msg.sender].isRegistered, "Voter must be registered");
+
+        require(!voters[msg.sender].hasVoted, "Voter already voted");
+
+        require(votedProposalId < proposals.length, "Proposal does not exist");
+
+        voters[msg.sender].hasVoted = true;
+
+        voters[msg.sender].votedProposalId = votedProposalId;
+
+        proposals[votedProposalId].voteCount++;
+
+        emit Voted(msg.sender, votedProposalId);
+    }
 }
 
