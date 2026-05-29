@@ -137,5 +137,11 @@ contract Voting is Ownable {
 
         emit WorkflowStatusChange(previousStatus, workflowStatus);
     }
+
+    function getWinner() public view returns (Proposal memory) {
+        require(workflowStatus == WorkflowStatus.VotesTallied, "Votes not tallied yet");
+
+        return proposals[winningProposalId];
+    }
 }
 
