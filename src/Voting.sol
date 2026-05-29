@@ -31,13 +31,13 @@ contract Voting is Ownable {
         uint256 voteCount;
     }
 
-    uint256 winningProposalId;
+    uint256 internal winningProposalId;
 
-    mapping(address => Voter) voters;
+    mapping(address => Voter) internal voters;
 
-    Proposal[] proposals;
+    Proposal[] internal proposals;
 
-    WorkflowStatus workflowStatus;
+    WorkflowStatus internal workflowStatus;
 
     function whitelistAdd(address voterAddress) public onlyOwner {
         require(!voters[voterAddress].isRegistered, "Voter already registered");
