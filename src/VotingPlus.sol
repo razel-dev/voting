@@ -38,7 +38,8 @@ contract VotingPlus is Voting {
     /// @notice Normalizes a proposal description
     /// @param description Description to normalize
     /// @return Normalized description
-    /// @dev Converts uppercase ASCII letters to lowercase, trims leading/trailing spaces and collapses multiple spaces into a single space
+    /// @dev Converts uppercase ASCII letters to lowercase, trims leading/trailing spaces,
+    /// collapses multiple spaces into a single space and removes punctuation characters
     function normalizeDescription(string memory description) private pure returns (string memory) {
         bytes memory data = bytes(description);
 
@@ -80,7 +81,7 @@ contract VotingPlus is Voting {
             trimmed[i - start] = data[i];
         }
 
-        // Normalize internal whitespace
+        // Normalize internal whitespace and remove punctuation
         bool previousWasSpace = false;
 
         bytes memory normalized = new bytes(trimmed.length);
@@ -88,7 +89,21 @@ contract VotingPlus is Voting {
         uint256 normalizedLength = 0;
 
         for (uint256 i = 0; i < trimmed.length; i++) {
-            if (uint8(trimmed[i]) == 32) {
+            uint8 charCode = uint8(trimmed[i]);
+
+            // Ignore punctuation
+            if (
+                charCode == 33 // !
+                    || charCode == 44 // ,
+                    || charCode == 46 // .
+                    || charCode == 58 // :
+                    || charCode == 59 // ;
+                    || charCode == 63 // ?
+            ) {
+                continue;
+            }
+
+            if (charCode == 32) {
                 if (!previousWasSpace) {
                     normalized[normalizedLength] = trimmed[i];
 
