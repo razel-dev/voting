@@ -20,10 +20,13 @@ contract VotingPlus is Voting {
     /// @notice Checks whether a proposal already exists
     /// @param description The proposal description to search for
     /// @return True if an identical proposal already exists, otherwise false
-    /// @dev Iterates through all proposals and compares descriptions using keccak256 hashes because Solidity does not support direct string comparison
+    /// @dev Compares normalized descriptions using keccak256 hashes because Solidity does not support direct string comparison
     function proposalExists(string memory description) private view returns (bool) {
         for (uint256 i = 0; i < proposals.length; i++) {
-            if (keccak256(bytes(proposals[i].description)) == keccak256(bytes(description))) {
+            if (
+                keccak256(bytes(normalizeDescription(proposals[i].description)))
+                    == keccak256(bytes(normalizeDescription(description)))
+            ) {
                 return true;
             }
         }
