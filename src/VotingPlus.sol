@@ -30,8 +30,11 @@ contract VotingPlus is Voting {
     /// @notice Adds a new proposal
     /// @param description The description of the proposal to be added
     /// @dev Validates that the proposal description is not empty before adding it to the proposals array
+    /// @dev Checks for duplicate proposals by comparing the description with existing proposals to prevent adding the same proposal multiple times
     function addProposal(string memory description) public override {
         require(bytes(description).length > 0, "Proposal cannot be empty");
+
+        require(!proposalExists(description), "Proposal already exists");
 
         super.addProposal(description);
     }
