@@ -17,6 +17,16 @@ contract VotingPlus is Voting {
         _;
     }
 
+    function proposalExists(string memory description) private view returns (bool) {
+        for (uint256 i = 0; i < proposals.length; i++) {
+            if (keccak256(bytes(proposals[i].description)) == keccak256(bytes(description))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// @notice Adds a new proposal
     /// @param description The description of the proposal to be added
     /// @dev Validates that the proposal description is not empty before adding it to the proposals array
