@@ -31,6 +31,22 @@ contract VotingPlus is Voting {
         return false;
     }
 
+    /// @notice Normalizes a proposal description
+    /// @param description Description to normalize
+    /// @return Normalized description
+    /// @dev Converts uppercase ASCII letters to lowercase
+    function normalizeDescription(string memory description) private pure returns (string memory) {
+        bytes memory data = bytes(description);
+
+        for (uint256 i = 0; i < data.length; i++) {
+            if (uint8(data[i]) >= 65 && uint8(data[i]) <= 90) {
+                data[i] = bytes1(uint8(data[i]) + 32);
+            }
+        }
+
+        return string(data);
+    }
+
     /// @notice Adds a new proposal
     /// @param description The description of the proposal to be added
     /// @dev Validates that the proposal description is not empty before adding it to the proposals array
