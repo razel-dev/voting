@@ -6,7 +6,8 @@ import "./Voting.sol";
 /// @title VotingPlus
 /// @author Rafael Alcaniz
 /// @notice Enhanced voting contract with additional validations and utility functions
-/// @dev Adds onlyVoter modifier, proposal validation and proposal getter functions
+/// @dev Adds onlyVoter modifier, proposal validation, duplicate detection,
+/// proposal description normalization and proposal getter functions
 
 contract VotingPlus is Voting {
     /// @notice Restricts access to registered voters only
@@ -37,7 +38,7 @@ contract VotingPlus is Voting {
     /// @notice Normalizes a proposal description
     /// @param description Description to normalize
     /// @return Normalized description
-    /// @dev Converts uppercase ASCII letters to lowercase
+    /// @dev Converts uppercase ASCII letters to lowercase and trims leading/trailing spaces
     function normalizeDescription(string memory description) private pure returns (string memory) {
         bytes memory data = bytes(description);
 
@@ -47,7 +48,34 @@ contract VotingPlus is Voting {
             }
         }
 
-        return string(data);
+        if (data.length == 0) {
+            return "";
+        }
+
+        uint256 start = 0;
+
+        while (start < data.length && uint8(data[start]) == 32) {
+            start++;
+        }
+
+        if (start == data.length) {
+            return "";
+        }
+
+        uint256 end = data.length - 1;
+
+        while (end > start && uint8(data[end]) == 32) {
+            end--;
+        }
+
+        bytes memory trimmed = new bytes(end - start + 1);
+
+        // Copy useful characters
+        for (uint256 i = start; i <= end; i++) {
+            trimmed[i - start] = data[i];
+        }
+
+        return string(trimmed);
     }
 
     /// @notice Adds a new proposal
