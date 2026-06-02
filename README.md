@@ -62,6 +62,71 @@ Comptabilisation
 Consultation du gagnant
 
 
+## VotingPlus Enhancements
+
+The project includes an enhanced version of the voting contract named VotingPlus.
+
+Additional Features
+Proposal Validation
+
+- Prevents voters from submitting empty proposals.
+
+require(
+    bytes(description).length > 0,
+    "Proposal cannot be empty"
+);
+
+Benefits:
+
+Improves data quality
+Prevents meaningless proposals
+Enforces business rules
+Duplicate Proposal Detection
+
+- Prevents registering the same proposal multiple times.
+
+require(
+    !proposalExists(description),
+    "Proposal already exists"
+);
+
+Benefits:
+
+Avoids duplicate proposals
+Improves vote readability
+Prevents vote fragmentation
+Proposal Lookup Helper
+
+- A dedicated helper function scans all registered proposals and detects duplicates.
+
+function proposalExists(
+    string memory description
+)
+    private
+    view
+    returns (bool)
+
+Implementation details:
+
+Iterates through the proposals array
+Uses keccak256() hashes to compare strings
+Returns true if a matching proposal exists
+Proposal Utilities
+getProposalCount()
+
+Returns the total number of registered proposals.
+
+getProposal(uint256 proposalId)
+
+Returns a proposal by its identifier.
+
+Benefits:
+
+Easier proposal consultation
+Better transparency
+Simplifies future front-end integration
+
+
 
 ## Structure du projet
 
