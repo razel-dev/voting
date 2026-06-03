@@ -61,4 +61,45 @@ contract VotingPlus is Voting {
 
         return proposals[proposalId];
     }
+
+    /// @notice Returns the identifiers of proposals tied for the highest vote count
+    /// @return Array of proposal IDs that are tied for first place
+    /// @dev Returns an empty array when there is no tie
+    function getTiedProposals() public view returns (uint256[] memory) {
+        uint256 maxVoteCount = 0;
+
+        // Recherche du score maximal
+        for (uint256 i = 0; i < proposals.length; i++) {
+            if (proposals[i].voteCount > maxVoteCount) {
+                maxVoteCount = proposals[i].voteCount;
+            }
+        }
+
+        uint256 tieCount = 0;
+
+        // Comptage des propositions ayant le score maximal
+        for (uint256 i = 0; i < proposals.length; i++) {
+            if (proposals[i].voteCount == maxVoteCount) {
+                tieCount++;
+            }
+        }
+
+        // Pas d'ex æquo
+        if (tieCount < 2) {
+            return new uint256[](0);
+        }
+
+        uint256[] memory tiedProposals = new uint256[](tieCount);
+        uint256 tieIndex = 0;
+
+        // Remplissage du tableau des propositions ex æquo
+        for (uint256 i = 0; i < proposals.length; i++) {
+            if (proposals[i].voteCount == maxVoteCount) {
+                tiedProposals[tieIndex] = i;
+                tieIndex++;
+            }
+        }
+
+        return tiedProposals;
+    }
 }
