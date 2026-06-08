@@ -46,6 +46,8 @@ contract Voting is Ownable {
     }
 
     function whitelistAdd(address voterAddress) external onlyOwner {
+        require(workflowStatus == WorkflowStatus.RegisteringVoters, "Voters registration phase required");
+
         require(!voters[voterAddress].isRegistered, "Voter already registered");
 
         voters[voterAddress].isRegistered = true;
