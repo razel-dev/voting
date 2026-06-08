@@ -177,7 +177,7 @@ contract Voting is Ownable {
         return proposals.length;
     }
 
-    function getProposal(uint256 proposalId) external view returns (Proposal memory) {
+    function getProposal(uint256 proposalId) external view onlyVoter returns (Proposal memory) {
         require(proposalId < proposals.length, "Proposal does not exist");
 
         return proposals[proposalId];
