@@ -45,7 +45,7 @@ contract Voting is Ownable {
         _;
     }
 
-    function whitelistAdd(address voterAddress) public onlyOwner {
+    function whitelistAdd(address voterAddress) external onlyOwner {
         require(!voters[voterAddress].isRegistered, "Voter already registered");
 
         voters[voterAddress].isRegistered = true;
@@ -53,7 +53,7 @@ contract Voting is Ownable {
         emit VoterRegistered(voterAddress);
     }
 
-    function startProposalRegistration() public onlyOwner {
+    function startProposalRegistration() external onlyOwner {
         require(workflowStatus == WorkflowStatus.RegisteringVoters, "Voters registration phase required");
 
         WorkflowStatus previousStatus = workflowStatus;
@@ -92,7 +92,7 @@ contract Voting is Ownable {
         emit ProposalRegistered(proposalId);
     }
 
-    function endProposalRegistration() public onlyOwner {
+    function endProposalRegistration() external onlyOwner {
         require(workflowStatus == WorkflowStatus.ProposalsRegistrationStarted, "Proposals registration phase required");
 
         WorkflowStatus previousStatus = workflowStatus;
@@ -102,7 +102,7 @@ contract Voting is Ownable {
         emit WorkflowStatusChange(previousStatus, workflowStatus);
     }
 
-    function startVotingSession() public onlyOwner {
+    function startVotingSession() external onlyOwner {
         require(
             workflowStatus == WorkflowStatus.ProposalsRegistrationEnded, "Proposals registration phase must be ended"
         );
@@ -114,7 +114,7 @@ contract Voting is Ownable {
         emit WorkflowStatusChange(previousStatus, workflowStatus);
     }
 
-    function endVotingSession() public onlyOwner {
+    function endVotingSession() external onlyOwner {
         require(workflowStatus == WorkflowStatus.VotingSessionStarted, "Voting session started phase required");
 
         WorkflowStatus previousStatus = workflowStatus;
@@ -142,7 +142,7 @@ contract Voting is Ownable {
         emit Voted(msg.sender, votedProposalId);
     }
 
-    function tallyVotes() public onlyOwner {
+    function tallyVotes() external onlyOwner {
         require(workflowStatus == WorkflowStatus.VotingSessionEnded, "Voting session ended phase required");
 
         uint256 winningVoteCount = 0;
@@ -161,23 +161,23 @@ contract Voting is Ownable {
         emit WorkflowStatusChange(previousStatus, workflowStatus);
     }
 
-    function getWinner() public view returns (Proposal memory) {
+    function getWinner() external view returns (Proposal memory) {
         require(workflowStatus == WorkflowStatus.VotesTallied, "Votes not tallied yet");
 
         return proposals[winningProposalId];
     }
 
-    function getProposalCount() public view returns (uint256) {
+    function getProposalCount() external view returns (uint256) {
         return proposals.length;
     }
 
-    function getProposal(uint256 proposalId) public view returns (Proposal memory) {
+    function getProposal(uint256 proposalId) external view returns (Proposal memory) {
         require(proposalId < proposals.length, "Proposal does not exist");
 
         return proposals[proposalId];
     }
 
-    function getTiedProposals() public view returns (uint256[] memory) {
+    function getTiedProposals() external view returns (uint256[] memory) {
         uint256 maxVoteCount = 0;
 
         for (uint256 i = 0; i < proposals.length; i++) {
