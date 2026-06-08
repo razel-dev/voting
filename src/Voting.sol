@@ -2,6 +2,7 @@
 pragma solidity ^0.8.35;
 
 import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
+import "./StringUtils.sol";
 
 contract Voting is Ownable {
     constructor() Ownable(msg.sender) {}
@@ -39,6 +40,11 @@ contract Voting is Ownable {
 
     WorkflowStatus internal workflowStatus;
 
+    modifier onlyVoter() {
+        require(voters[msg.sender].isRegistered, "Voter must be registered");
+        _;
+    }
+
     function whitelistAdd(address voterAddress) public onlyOwner {
         require(!voters[voterAddress].isRegistered, "Voter already registered");
 
@@ -57,10 +63,27 @@ contract Voting is Ownable {
         emit WorkflowStatusChange(previousStatus, workflowStatus);
     }
 
-    function addProposal(string memory description) public virtual {
+    function proposalExists(string memory description) private view returns (bool) {
+        for (uint256 i = 0; i < proposals.length; i++) {
+            if (
+                keccak256(abi.encodePacked(StringUtils.normalize(proposals[i].description)))
+                    == keccak256(abi.encodePacked(StringUtils.normalize(description)))
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    function addProposal(string memory description) public {
         require(workflowStatus == WorkflowStatus.ProposalsRegistrationStarted, "Proposal registration not started");
 
         require(voters[msg.sender].isRegistered, "Voter must be registered");
+
+        require(bytes(description).length > 0, "Proposal cannot be empty");
+
+        require(!proposalExists(description), "Proposal already exists");
 
         proposals.push(Proposal(description, 0));
 
@@ -143,5 +166,48 @@ contract Voting is Ownable {
 
         return proposals[winningProposalId];
     }
-}
 
+    function getProposalCount() public view returns (uint256) {
+        return proposals.length;
+    }
+
+    function getProposal(uint256 proposalId) public view returns (Proposal memory) {
+        require(proposalId < proposals.length, "Proposal does not exist");
+
+        return proposals[proposalId];
+    }
+
+    function getTiedProposals() public view returns (uint256[] memory) {
+        uint256 maxVoteCount = 0;
+
+        for (uint256 i = 0; i < proposals.length; i++) {
+            if (proposals[i].voteCount > maxVoteCount) {
+                maxVoteCount = proposals[i].voteCount;
+            }
+        }
+
+        uint256 tieCount = 0;
+
+        for (uint256 i = 0; i < proposals.length; i++) {
+            if (proposals[i].voteCount == maxVoteCount) {
+                tieCount++;
+            }
+        }
+
+        if (tieCount < 2) {
+            return new uint256[](0);
+        }
+
+        uint256[] memory tiedProposals = new uint256[](tieCount);
+        uint256 tieIndex = 0;
+
+        for (uint256 i = 0; i < proposals.length; i++) {
+            if (proposals[i].voteCount == maxVoteCount) {
+                tiedProposals[tieIndex] = i;
+                tieIndex++;
+            }
+        }
+
+        return tiedProposals;
+    }
+}
