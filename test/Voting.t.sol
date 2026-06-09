@@ -35,4 +35,16 @@ contract VotingTest is Test {
 
         voting.whitelistAdd(bob);
     }
+
+/// @notice Tests that VoterRegistered event is emitted
+/// @dev The owner registers Alice and the event must be emitted
+function testVoterRegisteredEventIsEmitted() public {
+    vm.expectEmit(true, false, false, true);
+
+    emit Voting.VoterRegistered(alice);
+
+    vm.prank(owner);
+
+    voting.whitelistAdd(alice);
+}
 }
