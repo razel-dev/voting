@@ -250,4 +250,136 @@ function testDuplicateProposalWithPunctuation() public {
 
     voting.addProposal("Swimming Pool!!!");
 }
+
+/// @notice Tests that a registered voter can cast a vote
+/// @dev Alice votes for proposal 0 during voting session
+function testRegisteredVoterCanVote() public {
+    vm.startPrank(owner);
+
+    voting.whitelistAdd(alice);
+    voting.startProposalRegistration();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.addProposal("Swimming Pool");
+
+    vm.startPrank(owner);
+
+    voting.endProposalRegistration();
+    voting.startVotingSession();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.setVote(0);
+}
+
+/// @notice Tests Voted event emission
+/// @dev Event must be emitted when Alice votes
+function testVotedEventIsEmitted() public {
+    vm.startPrank(owner);
+
+    voting.whitelistAdd(alice);
+    voting.startProposalRegistration();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.addProposal("Swimming Pool");
+
+    vm.startPrank(owner);
+
+    voting.endProposalRegistration();
+    voting.startVotingSession();
+
+    vm.stopPrank();
+
+    vm.expectEmit(true, true, false, true);
+
+    emit Voting.Voted(alice, 0);
+
+    vm.prank(alice);
+
+    voting.setVote(0);
+}
+
+/// @notice Tests that a voter cannot vote twice
+/// @dev Expects a revert on second vote attempt
+function testCannotVoteTwice() public {
+    vm.startPrank(owner);
+
+    voting.whitelistAdd(alice);
+    voting.startProposalRegistration();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.addProposal("Swimming Pool");
+
+    vm.startPrank(owner);
+
+    voting.endProposalRegistration();
+    voting.startVotingSession();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.setVote(0);
+
+    vm.prank(alice);
+
+    vm.expectRevert("Voter already voted");
+
+    voting.setVote(0);
+}
+
+/// @notice Tests voting for a non-existing proposal
+/// @dev Expects a revert when proposal id is invalid
+function testCannotVoteForNonExistingProposal() public {
+    vm.startPrank(owner);
+
+    voting.whitelistAdd(alice);
+    voting.startProposalRegistration();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.addProposal("Swimming Pool");
+
+    vm.startPrank(owner);
+
+    voting.endProposalRegistration();
+    voting.startVotingSession();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+
+    vm.expectRevert("Proposal does not exist");
+
+    voting.setVote(99);
+}
+
+/// @notice Tests voting outside voting session
+/// @dev Expects a revert because voting session has not started
+function testCannotVoteOutsideVotingSession() public {
+    vm.startPrank(owner);
+
+    voting.whitelistAdd(alice);
+    voting.startProposalRegistration();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.addProposal("Swimming Pool");
+
+    vm.prank(alice);
+
+    vm.expectRevert("Voting session not started");
+
+    voting.setVote(0);
+}
+
+
 }
