@@ -75,4 +75,32 @@ function testCannotRegisterVoterAfterRegistrationPhase() public {
 
     vm.stopPrank();
 }
+
+/// @notice Tests successful start of proposal registration phase
+/// @dev Verifies workflow status transition
+function testStartProposalRegistration() public {
+    vm.prank(owner);
+
+    voting.startProposalRegistration();
+
+    assertEq(
+        uint256(voting.getWorkflowStatus()),
+        uint256(Voting.WorkflowStatus.ProposalsRegistrationStarted)
+    );
+}
+
+/// @notice Tests WorkflowStatusChange event emission
+/// @dev Verifies event when proposal registration starts
+function testWorkflowStatusChangeEventOnProposalStart() public {
+    vm.expectEmit(true, true, false, true);
+
+    emit Voting.WorkflowStatusChange(
+        Voting.WorkflowStatus.RegisteringVoters,
+        Voting.WorkflowStatus.ProposalsRegistrationStarted
+    );
+
+    vm.prank(owner);
+
+    voting.startProposalRegistration();
+}
 }
