@@ -18,13 +18,21 @@ contract VotingTest is Test {
         voting = new Voting();
     }
 
-
-/// @notice Tests successful voter registration by the owner
-/// @dev The owner adds Alice to the whitelist
+    /// @notice Tests successful voter registration by the owner
+    /// @dev The owner adds Alice to the whitelist
     function testOwnerCanRegisterVoter() public {
-    vm.prank(owner);
+        vm.prank(owner);
 
-    voting.whitelistAdd(alice);
-}
+        voting.whitelistAdd(alice);
+    }
 
+    /// @notice Tests that a non-owner cannot register a voter
+    /// @dev Expects a revert because only the owner can call whitelistAdd
+    function testNonOwnerCannotRegisterVoter() public {
+        vm.prank(alice);
+
+        vm.expectRevert();
+
+        voting.whitelistAdd(bob);
+    }
 }
