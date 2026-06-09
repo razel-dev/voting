@@ -380,6 +380,131 @@ function testCannotVoteOutsideVotingSession() public {
 
     voting.setVote(0);
 }
+/// @notice Tests winner determination after vote tallying
+/// @dev Proposal with highest vote count must be returned
+function testWinnerIsCorrectlyDetermined() public {
+    vm.startPrank(owner);
 
+    voting.whitelistAdd(alice);
+    voting.whitelistAdd(bob);
+
+    voting.startProposalRegistration();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.addProposal("Swimming Pool");
+
+    vm.prank(bob);
+    voting.addProposal("Playground");
+
+    vm.startPrank(owner);
+
+    voting.endProposalRegistration();
+    voting.startVotingSession();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.setVote(1);
+
+    vm.prank(bob);
+    voting.setVote(1);
+
+    vm.startPrank(owner);
+
+    voting.endVotingSession();
+    voting.tallyVotes();
+
+    vm.stopPrank();
+
+    Voting.Proposal memory winner = voting.getWinner();
+
+    assertEq(winner.description, "playground");
+    assertEq(winner.voteCount, 2);
+}
+/// @notice Tests that winner cannot be retrieved before tallying
+/// @dev Expects a revert if votes have not been tallied
+function testCannotGetWinnerBeforeTally() public {
+    vm.expectRevert("Votes not tallied yet");
+
+    voting.getWinner();
+}
+/// @notice Tests tied proposal detection
+/// @dev Two proposals receive the same number of votes
+function testDetectTiedProposals() public {
+    vm.startPrank(owner);
+
+    voting.whitelistAdd(alice);
+    voting.whitelistAdd(bob);
+
+    voting.startProposalRegistration();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.addProposal("Swimming Pool");
+
+    vm.prank(bob);
+    voting.addProposal("Playground");
+
+    vm.startPrank(owner);
+
+    voting.endProposalRegistration();
+    voting.startVotingSession();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.setVote(0);
+
+    vm.prank(bob);
+    voting.setVote(1);
+
+    uint256[] memory tied = voting.getTiedProposals();
+
+    assertEq(tied.length, 2);
+    assertEq(tied[0], 0);
+    assertEq(tied[1], 1);
+}
+/// @notice Tests tie detection when no tie exists
+/// @dev Function must return an empty array
+function testNoTieReturnsEmptyArray() public {
+    vm.startPrank(owner);
+
+    voting.whitelistAdd(alice);
+    voting.whitelistAdd(bob);
+    voting.whitelistAdd(charlie);
+
+    voting.startProposalRegistration();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.addProposal("Swimming Pool");
+
+    vm.prank(bob);
+    voting.addProposal("Playground");
+
+    vm.startPrank(owner);
+
+    voting.endProposalRegistration();
+    voting.startVotingSession();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.setVote(0);
+
+    vm.prank(bob);
+    voting.setVote(0);
+
+    vm.prank(charlie);
+    voting.setVote(1);
+
+    uint256[] memory tied = voting.getTiedProposals();
+
+    assertEq(tied.length, 0);
+}
 
 }
