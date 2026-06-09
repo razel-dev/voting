@@ -153,4 +153,101 @@ function testNonRegisteredUserCannotAddProposal() public {
 
     voting.addProposal("Swimming Pool");
 }
+
+/// @notice Tests that an empty proposal is rejected
+/// @dev Expects a revert when submitting an empty proposal
+function testCannotAddEmptyProposal() public {
+    vm.startPrank(owner);
+
+    voting.whitelistAdd(alice);
+    voting.startProposalRegistration();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+
+    vm.expectRevert("Proposal cannot be empty");
+
+    voting.addProposal("");
+}
+
+/// @notice Tests that duplicate proposals are rejected
+/// @dev Expects a revert when the same proposal is submitted twice
+function testCannotAddDuplicateProposal() public {
+    vm.startPrank(owner);
+
+    voting.whitelistAdd(alice);
+    voting.startProposalRegistration();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.addProposal("Swimming Pool");
+
+    vm.prank(alice);
+
+    vm.expectRevert("Proposal already exists");
+
+    voting.addProposal("Swimming Pool");
+}
+
+/// @notice Tests proposal normalization for case differences
+/// @dev "Swimming Pool" and "SWIMMING POOL" must be considered identical
+function testDuplicateProposalWithDifferentCase() public {
+    vm.startPrank(owner);
+
+    voting.whitelistAdd(alice);
+    voting.startProposalRegistration();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.addProposal("Swimming Pool");
+
+    vm.prank(alice);
+
+    vm.expectRevert("Proposal already exists");
+
+    voting.addProposal("SWIMMING POOL");
+}
+
+/// @notice Tests proposal normalization for extra spaces
+/// @dev Multiple spaces and surrounding spaces must be ignored
+function testDuplicateProposalWithExtraSpaces() public {
+    vm.startPrank(owner);
+
+    voting.whitelistAdd(alice);
+    voting.startProposalRegistration();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.addProposal("Swimming Pool");
+
+    vm.prank(alice);
+
+    vm.expectRevert("Proposal already exists");
+
+    voting.addProposal("   Swimming     Pool   ");
+}
+
+/// @notice Tests proposal normalization for punctuation
+/// @dev Punctuation characters must not create distinct proposals
+function testDuplicateProposalWithPunctuation() public {
+    vm.startPrank(owner);
+
+    voting.whitelistAdd(alice);
+    voting.startProposalRegistration();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+    voting.addProposal("Swimming Pool");
+
+    vm.prank(alice);
+
+    vm.expectRevert("Proposal already exists");
+
+    voting.addProposal("Swimming Pool!!!");
+}
 }
