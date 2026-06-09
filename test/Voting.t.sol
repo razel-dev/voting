@@ -47,4 +47,18 @@ function testVoterRegisteredEventIsEmitted() public {
 
     voting.whitelistAdd(alice);
 }
+
+/// @notice Tests that a voter cannot be registered twice
+/// @dev Expects a revert when registering the same voter again
+function testCannotRegisterSameVoterTwice() public {
+    vm.startPrank(owner);
+
+    voting.whitelistAdd(alice);
+
+    vm.expectRevert("Voter already registered");
+
+    voting.whitelistAdd(alice);
+
+    vm.stopPrank();
+}
 }
