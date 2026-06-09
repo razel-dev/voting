@@ -103,4 +103,54 @@ function testWorkflowStatusChangeEventOnProposalStart() public {
 
     voting.startProposalRegistration();
 }
+
+/// @notice Tests that a registered voter can add a proposal
+/// @dev Alice registers a proposal during proposal registration phase
+function testRegisteredVoterCanAddProposal() public {
+    vm.startPrank(owner);
+
+    voting.whitelistAdd(alice);
+    voting.startProposalRegistration();
+
+    vm.stopPrank();
+
+    vm.prank(alice);
+
+    voting.addProposal("Swimming Pool");
+
+    assertEq(voting.getProposalCount(), 1);
+}
+
+/// @notice Tests ProposalRegistered event emission
+/// @dev Event must be emitted when a proposal is successfully registered
+function testProposalRegisteredEventIsEmitted() public {
+    vm.startPrank(owner);
+
+    voting.whitelistAdd(alice);
+    voting.startProposalRegistration();
+
+    vm.stopPrank();
+
+    vm.expectEmit(true, false, false, true);
+
+    emit Voting.ProposalRegistered(0);
+
+    vm.prank(alice);
+
+    voting.addProposal("Swimming Pool");
+}
+
+/// @notice Tests that an unregistered user cannot add a proposal
+/// @dev Expects a revert because Bob is not registered
+function testNonRegisteredUserCannotAddProposal() public {
+    vm.prank(owner);
+
+    voting.startProposalRegistration();
+
+    vm.expectRevert("Voter must be registered");
+
+    vm.prank(bob);
+
+    voting.addProposal("Swimming Pool");
+}
 }
