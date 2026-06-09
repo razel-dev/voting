@@ -61,4 +61,18 @@ function testCannotRegisterSameVoterTwice() public {
 
     vm.stopPrank();
 }
+
+/// @notice Tests that voter registration is forbidden after registration phase
+/// @dev Expects a revert when attempting to register a voter after proposal registration has started
+function testCannotRegisterVoterAfterRegistrationPhase() public {
+    vm.startPrank(owner);
+
+    voting.startProposalRegistration();
+
+    vm.expectRevert("Voters registration phase required");
+
+    voting.whitelistAdd(alice);
+
+    vm.stopPrank();
+}
 }
