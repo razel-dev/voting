@@ -17,4 +17,14 @@ contract VotingTest is Test {
 
         voting = new Voting();
     }
+
+
+/// @notice Tests successful voter registration by the owner
+/// @dev The owner adds Alice to the whitelist
+    function testOwnerCanRegisterVoter() public {
+    vm.prank(owner);
+
+    voting.whitelistAdd(alice);
+}
+
 }
