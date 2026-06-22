@@ -36,475 +36,474 @@ contract VotingTest is Test {
         voting.whitelistAdd(bob);
     }
 
-/// @notice Tests that VoterRegistered event is emitted
-/// @dev The owner registers Alice and the event must be emitted
-function testVoterRegisteredEventIsEmitted() public {
-    vm.expectEmit(true, false, false, true);
+    /// @notice Tests that VoterRegistered event is emitted
+    /// @dev The owner registers Alice and the event must be emitted
+    function testVoterRegisteredEventIsEmitted() public {
+        vm.expectEmit(true, false, false, true);
 
-    emit Voting.VoterRegistered(alice);
+        emit Voting.VoterRegistered(alice);
 
-    vm.prank(owner);
+        vm.prank(owner);
 
-    voting.whitelistAdd(alice);
-}
+        voting.whitelistAdd(alice);
+    }
 
-/// @notice Tests that a voter cannot be registered twice
-/// @dev Expects a revert when registering the same voter again
-function testCannotRegisterSameVoterTwice() public {
-    vm.startPrank(owner);
+    /// @notice Tests that a voter cannot be registered twice
+    /// @dev Expects a revert when registering the same voter again
+    function testCannotRegisterSameVoterTwice() public {
+        vm.startPrank(owner);
 
-    voting.whitelistAdd(alice);
+        voting.whitelistAdd(alice);
 
-    vm.expectRevert("Voter already registered");
+        vm.expectRevert("Voter already registered");
 
-    voting.whitelistAdd(alice);
+        voting.whitelistAdd(alice);
 
-    vm.stopPrank();
-}
+        vm.stopPrank();
+    }
 
-/// @notice Tests that voter registration is forbidden after registration phase
-/// @dev Expects a revert when attempting to register a voter after proposal registration has started
-function testCannotRegisterVoterAfterRegistrationPhase() public {
-    vm.startPrank(owner);
+    /// @notice Tests that voter registration is forbidden after registration phase
+    /// @dev Expects a revert when attempting to register a voter after proposal registration has started
+    function testCannotRegisterVoterAfterRegistrationPhase() public {
+        vm.startPrank(owner);
 
-    voting.startProposalRegistration();
+        voting.startProposalRegistration();
 
-    vm.expectRevert("Voters registration phase required");
+        vm.expectRevert("Voters registration phase required");
 
-    voting.whitelistAdd(alice);
+        voting.whitelistAdd(alice);
 
-    vm.stopPrank();
-}
+        vm.stopPrank();
+    }
 
-/// @notice Tests successful start of proposal registration phase
-/// @dev Verifies workflow status transition
-function testStartProposalRegistration() public {
-    vm.prank(owner);
+    /// @notice Tests successful start of proposal registration phase
+    /// @dev Verifies workflow status transition
+    function testStartProposalRegistration() public {
+        vm.prank(owner);
 
-    voting.startProposalRegistration();
+        voting.startProposalRegistration();
 
-    assertEq(
-        uint256(voting.getWorkflowStatus()),
-        uint256(Voting.WorkflowStatus.ProposalsRegistrationStarted)
-    );
-}
+        assertEq(uint256(voting.getWorkflowStatus()), uint256(Voting.WorkflowStatus.ProposalsRegistrationStarted));
+    }
 
-/// @notice Tests WorkflowStatusChange event emission
-/// @dev Verifies event when proposal registration starts
-function testWorkflowStatusChangeEventOnProposalStart() public {
-    vm.expectEmit(true, true, false, true);
+    /// @notice Tests WorkflowStatusChange event emission
+    /// @dev Verifies event when proposal registration starts
+    function testWorkflowStatusChangeEventOnProposalStart() public {
+        vm.expectEmit(true, true, false, true);
 
-    emit Voting.WorkflowStatusChange(
-        Voting.WorkflowStatus.RegisteringVoters,
-        Voting.WorkflowStatus.ProposalsRegistrationStarted
-    );
+        emit Voting.WorkflowStatusChange(
+            Voting.WorkflowStatus.RegisteringVoters, Voting.WorkflowStatus.ProposalsRegistrationStarted
+        );
 
-    vm.prank(owner);
+        vm.prank(owner);
 
-    voting.startProposalRegistration();
-}
+        voting.startProposalRegistration();
+    }
 
-/// @notice Tests that a registered voter can add a proposal
-/// @dev Alice registers a proposal during proposal registration phase
-function testRegisteredVoterCanAddProposal() public {
-    vm.startPrank(owner);
+    /// @notice Tests that a registered voter can add a proposal
+    /// @dev Alice registers a proposal during proposal registration phase
+    function testRegisteredVoterCanAddProposal() public {
+        vm.startPrank(owner);
 
-    voting.whitelistAdd(alice);
-    voting.startProposalRegistration();
+        voting.whitelistAdd(alice);
+        voting.startProposalRegistration();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.prank(alice);
+        vm.prank(alice);
 
-    voting.addProposal("Swimming Pool");
+        voting.addProposal("Swimming Pool");
 
-    assertEq(voting.getProposalCount(), 1);
-}
+        assertEq(voting.getProposalCount(), 1);
+    }
 
-/// @notice Tests ProposalRegistered event emission
-/// @dev Event must be emitted when a proposal is successfully registered
-function testProposalRegisteredEventIsEmitted() public {
-    vm.startPrank(owner);
+    /// @notice Tests ProposalRegistered event emission
+    /// @dev Event must be emitted when a proposal is successfully registered
+    function testProposalRegisteredEventIsEmitted() public {
+        vm.startPrank(owner);
 
-    voting.whitelistAdd(alice);
-    voting.startProposalRegistration();
+        voting.whitelistAdd(alice);
+        voting.startProposalRegistration();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.expectEmit(true, false, false, true);
+        vm.expectEmit(true, false, false, true);
 
-    emit Voting.ProposalRegistered(0);
+        emit Voting.ProposalRegistered(0);
 
-    vm.prank(alice);
+        vm.prank(alice);
 
-    voting.addProposal("Swimming Pool");
-}
+        voting.addProposal("Swimming Pool");
+    }
 
-/// @notice Tests that an unregistered user cannot add a proposal
-/// @dev Expects a revert because Bob is not registered
-function testNonRegisteredUserCannotAddProposal() public {
-    vm.prank(owner);
+    /// @notice Tests that an unregistered user cannot add a proposal
+    /// @dev Expects a revert because Bob is not registered
+    function testNonRegisteredUserCannotAddProposal() public {
+        vm.prank(owner);
 
-    voting.startProposalRegistration();
+        voting.startProposalRegistration();
 
-    vm.expectRevert("Voter must be registered");
+        vm.expectRevert("Voter must be registered");
 
-    vm.prank(bob);
+        vm.prank(bob);
 
-    voting.addProposal("Swimming Pool");
-}
+        voting.addProposal("Swimming Pool");
+    }
 
-/// @notice Tests that an empty proposal is rejected
-/// @dev Expects a revert when submitting an empty proposal
-function testCannotAddEmptyProposal() public {
-    vm.startPrank(owner);
+    /// @notice Tests that an empty proposal is rejected
+    /// @dev Expects a revert when submitting an empty proposal
+    function testCannotAddEmptyProposal() public {
+        vm.startPrank(owner);
 
-    voting.whitelistAdd(alice);
-    voting.startProposalRegistration();
+        voting.whitelistAdd(alice);
+        voting.startProposalRegistration();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.prank(alice);
+        vm.prank(alice);
 
-    vm.expectRevert("Proposal cannot be empty");
+        vm.expectRevert("Proposal cannot be empty");
 
-    voting.addProposal("");
-}
+        voting.addProposal("");
+    }
 
-/// @notice Tests that duplicate proposals are rejected
-/// @dev Expects a revert when the same proposal is submitted twice
-function testCannotAddDuplicateProposal() public {
-    vm.startPrank(owner);
+    /// @notice Tests that duplicate proposals are rejected
+    /// @dev Expects a revert when the same proposal is submitted twice
+    function testCannotAddDuplicateProposal() public {
+        vm.startPrank(owner);
 
-    voting.whitelistAdd(alice);
-    voting.startProposalRegistration();
+        voting.whitelistAdd(alice);
+        voting.startProposalRegistration();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.prank(alice);
-    voting.addProposal("Swimming Pool");
+        vm.prank(alice);
+        voting.addProposal("Swimming Pool");
 
-    vm.prank(alice);
+        vm.prank(alice);
 
-    vm.expectRevert("Proposal already exists");
+        vm.expectRevert("Proposal already exists");
 
-    voting.addProposal("Swimming Pool");
-}
+        voting.addProposal("Swimming Pool");
+    }
 
-/// @notice Tests proposal normalization for case differences
-/// @dev "Swimming Pool" and "SWIMMING POOL" must be considered identical
-function testDuplicateProposalWithDifferentCase() public {
-    vm.startPrank(owner);
+    /// @notice Tests proposal normalization for case differences
+    /// @dev "Swimming Pool" and "SWIMMING POOL" must be considered identical
+    function testDuplicateProposalWithDifferentCase() public {
+        vm.startPrank(owner);
 
-    voting.whitelistAdd(alice);
-    voting.startProposalRegistration();
+        voting.whitelistAdd(alice);
+        voting.startProposalRegistration();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.prank(alice);
-    voting.addProposal("Swimming Pool");
+        vm.prank(alice);
+        voting.addProposal("Swimming Pool");
 
-    vm.prank(alice);
+        vm.prank(alice);
 
-    vm.expectRevert("Proposal already exists");
+        vm.expectRevert("Proposal already exists");
 
-    voting.addProposal("SWIMMING POOL");
-}
+        voting.addProposal("SWIMMING POOL");
+    }
 
-/// @notice Tests proposal normalization for extra spaces
-/// @dev Multiple spaces and surrounding spaces must be ignored
-function testDuplicateProposalWithExtraSpaces() public {
-    vm.startPrank(owner);
+    /// @notice Tests proposal normalization for extra spaces
+    /// @dev Multiple spaces and surrounding spaces must be ignored
+    function testDuplicateProposalWithExtraSpaces() public {
+        vm.startPrank(owner);
 
-    voting.whitelistAdd(alice);
-    voting.startProposalRegistration();
+        voting.whitelistAdd(alice);
+        voting.startProposalRegistration();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.prank(alice);
-    voting.addProposal("Swimming Pool");
+        vm.prank(alice);
+        voting.addProposal("Swimming Pool");
 
-    vm.prank(alice);
+        vm.prank(alice);
 
-    vm.expectRevert("Proposal already exists");
+        vm.expectRevert("Proposal already exists");
 
-    voting.addProposal("   Swimming     Pool   ");
-}
+        voting.addProposal("   Swimming     Pool   ");
+    }
 
-/// @notice Tests proposal normalization for punctuation
-/// @dev Punctuation characters must not create distinct proposals
-function testDuplicateProposalWithPunctuation() public {
-    vm.startPrank(owner);
+    /// @notice Tests proposal normalization for punctuation
+    /// @dev Punctuation characters must not create distinct proposals
+    function testDuplicateProposalWithPunctuation() public {
+        vm.startPrank(owner);
 
-    voting.whitelistAdd(alice);
-    voting.startProposalRegistration();
+        voting.whitelistAdd(alice);
+        voting.startProposalRegistration();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.prank(alice);
-    voting.addProposal("Swimming Pool");
+        vm.prank(alice);
+        voting.addProposal("Swimming Pool");
 
-    vm.prank(alice);
+        vm.prank(alice);
 
-    vm.expectRevert("Proposal already exists");
+        vm.expectRevert("Proposal already exists");
 
-    voting.addProposal("Swimming Pool!!!");
-}
+        voting.addProposal("Swimming Pool!!!");
+    }
 
-/// @notice Tests that a registered voter can cast a vote
-/// @dev Alice votes for proposal 0 during voting session
-function testRegisteredVoterCanVote() public {
-    vm.startPrank(owner);
+    /// @notice Tests that a registered voter can cast a vote
+    /// @dev Alice votes for proposal 0 during voting session
+    function testRegisteredVoterCanVote() public {
+        vm.startPrank(owner);
 
-    voting.whitelistAdd(alice);
-    voting.startProposalRegistration();
+        voting.whitelistAdd(alice);
+        voting.startProposalRegistration();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.prank(alice);
-    voting.addProposal("Swimming Pool");
+        vm.prank(alice);
+        voting.addProposal("Swimming Pool");
 
-    vm.startPrank(owner);
+        vm.startPrank(owner);
 
-    voting.endProposalRegistration();
-    voting.startVotingSession();
+        voting.endProposalRegistration();
+        voting.startVotingSession();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.prank(alice);
-    voting.setVote(0);
-}
+        vm.prank(alice);
+        voting.setVote(0);
+    }
 
-/// @notice Tests Voted event emission
-/// @dev Event must be emitted when Alice votes
-function testVotedEventIsEmitted() public {
-    vm.startPrank(owner);
+    /// @notice Tests Voted event emission
+    /// @dev Event must be emitted when Alice votes
+    function testVotedEventIsEmitted() public {
+        vm.startPrank(owner);
 
-    voting.whitelistAdd(alice);
-    voting.startProposalRegistration();
+        voting.whitelistAdd(alice);
+        voting.startProposalRegistration();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.prank(alice);
-    voting.addProposal("Swimming Pool");
+        vm.prank(alice);
+        voting.addProposal("Swimming Pool");
 
-    vm.startPrank(owner);
+        vm.startPrank(owner);
 
-    voting.endProposalRegistration();
-    voting.startVotingSession();
+        voting.endProposalRegistration();
+        voting.startVotingSession();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.expectEmit(true, true, false, true);
+        vm.expectEmit(true, true, false, true);
 
-    emit Voting.Voted(alice, 0);
+        emit Voting.Voted(alice, 0);
 
-    vm.prank(alice);
+        vm.prank(alice);
 
-    voting.setVote(0);
-}
+        voting.setVote(0);
+    }
 
-/// @notice Tests that a voter cannot vote twice
-/// @dev Expects a revert on second vote attempt
-function testCannotVoteTwice() public {
-    vm.startPrank(owner);
+    /// @notice Tests that a voter cannot vote twice
+    /// @dev Expects a revert on second vote attempt
+    function testCannotVoteTwice() public {
+        vm.startPrank(owner);
 
-    voting.whitelistAdd(alice);
-    voting.startProposalRegistration();
+        voting.whitelistAdd(alice);
+        voting.startProposalRegistration();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.prank(alice);
-    voting.addProposal("Swimming Pool");
+        vm.prank(alice);
+        voting.addProposal("Swimming Pool");
 
-    vm.startPrank(owner);
+        vm.startPrank(owner);
 
-    voting.endProposalRegistration();
-    voting.startVotingSession();
+        voting.endProposalRegistration();
+        voting.startVotingSession();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.prank(alice);
-    voting.setVote(0);
+        vm.prank(alice);
+        voting.setVote(0);
 
-    vm.prank(alice);
+        vm.prank(alice);
 
-    vm.expectRevert("Voter already voted");
+        vm.expectRevert("Voter already voted");
 
-    voting.setVote(0);
-}
+        voting.setVote(0);
+    }
 
-/// @notice Tests voting for a non-existing proposal
-/// @dev Expects a revert when proposal id is invalid
-function testCannotVoteForNonExistingProposal() public {
-    vm.startPrank(owner);
+    /// @notice Tests voting for a non-existing proposal
+    /// @dev Expects a revert when proposal id is invalid
+    function testCannotVoteForNonExistingProposal() public {
+        vm.startPrank(owner);
 
-    voting.whitelistAdd(alice);
-    voting.startProposalRegistration();
+        voting.whitelistAdd(alice);
+        voting.startProposalRegistration();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.prank(alice);
-    voting.addProposal("Swimming Pool");
+        vm.prank(alice);
+        voting.addProposal("Swimming Pool");
 
-    vm.startPrank(owner);
+        vm.startPrank(owner);
 
-    voting.endProposalRegistration();
-    voting.startVotingSession();
+        voting.endProposalRegistration();
+        voting.startVotingSession();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.prank(alice);
+        vm.prank(alice);
 
-    vm.expectRevert("Proposal does not exist");
+        vm.expectRevert("Proposal does not exist");
 
-    voting.setVote(99);
-}
+        voting.setVote(99);
+    }
 
-/// @notice Tests voting outside voting session
-/// @dev Expects a revert because voting session has not started
-function testCannotVoteOutsideVotingSession() public {
-    vm.startPrank(owner);
+    /// @notice Tests voting outside voting session
+    /// @dev Expects a revert because voting session has not started
+    function testCannotVoteOutsideVotingSession() public {
+        vm.startPrank(owner);
 
-    voting.whitelistAdd(alice);
-    voting.startProposalRegistration();
+        voting.whitelistAdd(alice);
+        voting.startProposalRegistration();
 
-    vm.stopPrank();
+        vm.stopPrank();
 
-    vm.prank(alice);
-    voting.addProposal("Swimming Pool");
+        vm.prank(alice);
+        voting.addProposal("Swimming Pool");
 
-    vm.prank(alice);
+        vm.prank(alice);
 
-    vm.expectRevert("Voting session not started");
+        vm.expectRevert("Voting session not started");
 
-    voting.setVote(0);
-}
-/// @notice Tests winner determination after vote tallying
-/// @dev Proposal with highest vote count must be returned
-function testWinnerIsCorrectlyDetermined() public {
-    vm.startPrank(owner);
+        voting.setVote(0);
+    }
 
-    voting.whitelistAdd(alice);
-    voting.whitelistAdd(bob);
+    /// @notice Tests winner determination after vote tallying
+    /// @dev Proposal with highest vote count must be returned
+    function testWinnerIsCorrectlyDetermined() public {
+        vm.startPrank(owner);
 
-    voting.startProposalRegistration();
+        voting.whitelistAdd(alice);
+        voting.whitelistAdd(bob);
 
-    vm.stopPrank();
+        voting.startProposalRegistration();
 
-    vm.prank(alice);
-    voting.addProposal("Swimming Pool");
+        vm.stopPrank();
 
-    vm.prank(bob);
-    voting.addProposal("Playground");
+        vm.prank(alice);
+        voting.addProposal("Swimming Pool");
 
-    vm.startPrank(owner);
+        vm.prank(bob);
+        voting.addProposal("Playground");
 
-    voting.endProposalRegistration();
-    voting.startVotingSession();
+        vm.startPrank(owner);
 
-    vm.stopPrank();
+        voting.endProposalRegistration();
+        voting.startVotingSession();
 
-    vm.prank(alice);
-    voting.setVote(1);
+        vm.stopPrank();
 
-    vm.prank(bob);
-    voting.setVote(1);
+        vm.prank(alice);
+        voting.setVote(1);
 
-    vm.startPrank(owner);
+        vm.prank(bob);
+        voting.setVote(1);
 
-    voting.endVotingSession();
-    voting.tallyVotes();
+        vm.startPrank(owner);
 
-    vm.stopPrank();
+        voting.endVotingSession();
+        voting.tallyVotes();
 
-    Voting.Proposal memory winner = voting.getWinner();
+        vm.stopPrank();
 
-    assertEq(winner.description, "playground");
-    assertEq(winner.voteCount, 2);
-}
-/// @notice Tests that winner cannot be retrieved before tallying
-/// @dev Expects a revert if votes have not been tallied
-function testCannotGetWinnerBeforeTally() public {
-    vm.expectRevert("Votes not tallied yet");
+        Voting.Proposal memory winner = voting.getWinner();
 
-    voting.getWinner();
-}
-/// @notice Tests tied proposal detection
-/// @dev Two proposals receive the same number of votes
-function testDetectTiedProposals() public {
-    vm.startPrank(owner);
+        assertEq(winner.description, "playground");
+        assertEq(winner.voteCount, 2);
+    }
 
-    voting.whitelistAdd(alice);
-    voting.whitelistAdd(bob);
+    /// @notice Tests that winner cannot be retrieved before tallying
+    /// @dev Expects a revert if votes have not been tallied
+    function testCannotGetWinnerBeforeTally() public {
+        vm.expectRevert("Votes not tallied yet");
 
-    voting.startProposalRegistration();
+        voting.getWinner();
+    }
 
-    vm.stopPrank();
+    /// @notice Tests tied proposal detection
+    /// @dev Two proposals receive the same number of votes
+    function testDetectTiedProposals() public {
+        vm.startPrank(owner);
 
-    vm.prank(alice);
-    voting.addProposal("Swimming Pool");
+        voting.whitelistAdd(alice);
+        voting.whitelistAdd(bob);
 
-    vm.prank(bob);
-    voting.addProposal("Playground");
+        voting.startProposalRegistration();
 
-    vm.startPrank(owner);
+        vm.stopPrank();
 
-    voting.endProposalRegistration();
-    voting.startVotingSession();
+        vm.prank(alice);
+        voting.addProposal("Swimming Pool");
 
-    vm.stopPrank();
+        vm.prank(bob);
+        voting.addProposal("Playground");
 
-    vm.prank(alice);
-    voting.setVote(0);
+        vm.startPrank(owner);
 
-    vm.prank(bob);
-    voting.setVote(1);
+        voting.endProposalRegistration();
+        voting.startVotingSession();
 
-    uint256[] memory tied = voting.getTiedProposals();
+        vm.stopPrank();
 
-    assertEq(tied.length, 2);
-    assertEq(tied[0], 0);
-    assertEq(tied[1], 1);
-}
-/// @notice Tests tie detection when no tie exists
-/// @dev Function must return an empty array
-function testNoTieReturnsEmptyArray() public {
-    vm.startPrank(owner);
+        vm.prank(alice);
+        voting.setVote(0);
 
-    voting.whitelistAdd(alice);
-    voting.whitelistAdd(bob);
-    voting.whitelistAdd(charlie);
+        vm.prank(bob);
+        voting.setVote(1);
 
-    voting.startProposalRegistration();
+        uint256[] memory tied = voting.getTiedProposals();
 
-    vm.stopPrank();
+        assertEq(tied.length, 2);
+        assertEq(tied[0], 0);
+        assertEq(tied[1], 1);
+    }
 
-    vm.prank(alice);
-    voting.addProposal("Swimming Pool");
+    /// @notice Tests tie detection when no tie exists
+    /// @dev Function must return an empty array
+    function testNoTieReturnsEmptyArray() public {
+        vm.startPrank(owner);
 
-    vm.prank(bob);
-    voting.addProposal("Playground");
+        voting.whitelistAdd(alice);
+        voting.whitelistAdd(bob);
+        voting.whitelistAdd(charlie);
 
-    vm.startPrank(owner);
+        voting.startProposalRegistration();
 
-    voting.endProposalRegistration();
-    voting.startVotingSession();
+        vm.stopPrank();
 
-    vm.stopPrank();
+        vm.prank(alice);
+        voting.addProposal("Swimming Pool");
 
-    vm.prank(alice);
-    voting.setVote(0);
+        vm.prank(bob);
+        voting.addProposal("Playground");
 
-    vm.prank(bob);
-    voting.setVote(0);
+        vm.startPrank(owner);
 
-    vm.prank(charlie);
-    voting.setVote(1);
+        voting.endProposalRegistration();
+        voting.startVotingSession();
 
-    uint256[] memory tied = voting.getTiedProposals();
+        vm.stopPrank();
 
-    assertEq(tied.length, 0);
-}
+        vm.prank(alice);
+        voting.setVote(0);
 
+        vm.prank(bob);
+        voting.setVote(0);
+
+        vm.prank(charlie);
+        voting.setVote(1);
+
+        uint256[] memory tied = voting.getTiedProposals();
+
+        assertEq(tied.length, 0);
+    }
 }
