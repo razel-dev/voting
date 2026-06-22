@@ -26,7 +26,7 @@ contract Voting is Ownable {
 
     /// @notice Emitted when a voter is registered
     /// @param voterAddress Address of the registered voter
-    event VoterRegistered(address voterAddress);
+    event VoterRegistered(address indexed voterAddress);
 
     /// @notice Emitted when workflow status changes
     /// @param previousStatus Previous workflow phase
@@ -35,12 +35,12 @@ contract Voting is Ownable {
 
     /// @notice Emitted when a proposal is registered
     /// @param proposalId Identifier of the proposal
-    event ProposalRegistered(uint256 proposalId);
+    event ProposalRegistered(uint256 indexed proposalId);
 
     /// @notice Emitted when a vote is cast
     /// @param voter Address of the voter
     /// @param proposalId Identifier of the selected proposal
-    event Voted(address voter, uint256 proposalId);
+    event Voted(address indexed voter, uint256 indexed proposalId);
 
     /// @notice Represents a registered voter
     /// @dev Stores registration and voting information
@@ -68,6 +68,9 @@ contract Voting is Ownable {
 
     /// @notice Current workflow phase
     WorkflowStatus internal workflowStatus;
+
+    /// @notice Stores normalized proposal hashes to prevent duplicates efficiently
+    mapping(bytes32 => bool) internal proposalHashes;
 
     /// @notice Restricts access to registered voters
     /// @dev Reverts if sender is not registered
@@ -103,18 +106,11 @@ contract Voting is Ownable {
     /// @notice Checks whether a proposal already exists
     /// @param description Proposal description
     /// @return True if a duplicate proposal exists
-    /// @dev Uses normalized hashes for comparison
+    /// @dev Uses a normalized proposal hash stored in a mapping for gas optimization
     function proposalExists(string memory description) private view returns (bool) {
-        for (uint256 i = 0; i < proposals.length; i++) {
-            if (
-                keccak256(abi.encodePacked(StringUtils.normalize(proposals[i].description)))
-                    == keccak256(abi.encodePacked(StringUtils.normalize(description)))
-            ) {
-                return true;
-            }
-        }
+        bytes32 normalizedHash = keccak256(abi.encodePacked(StringUtils.normalize(description)));
 
-        return false;
+        return proposalHashes[normalizedHash];
     }
 
     /// @notice Registers a proposal
@@ -127,7 +123,11 @@ contract Voting is Ownable {
 
         require(bytes(description).length > 0, "Proposal cannot be empty");
 
-        require(!proposalExists(description), "Proposal already exists");
+        bytes32 normalizedHash = keccak256(abi.encodePacked(StringUtils.normalize(description)));
+
+        require(!proposalHashes[normalizedHash], "Proposal already exists");
+
+        proposalHashes[normalizedHash] = true;
 
         proposals.push(Proposal(description, 0));
 
